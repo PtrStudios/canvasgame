@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <canvas id="canvas" width="500" height="500" style="background-color: black;"></canvas>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+    <script type="text/javascript">
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var requestAnimationFrame = window.requestAnimationFrame ||
+                                    window.webkitRequestAnimationFrame;
+        var keys = [];
+        window.addEventListener("keydown",function(e) {
+            keys[e.keyCode] = true;
+        },true);
+        window.addEventListener("keyup",function(e) {
+            keys[e.keyCode] = false;
+        },true);
+        var player = {
+            x : 50,
+            y : 50,
+            velX : 0,
+            velY : 0,
+            width : 50,
+            height : 50
+        }
+        var enemy = {
+            x : 100,
+            y : 100,
+            width : 50,
+            height: 50
+        }
+        function clos() {
+            window.close();
+        }
+        function update() { 
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (keys[39] && player.velX < 3) {
+                player.velX = 0;
+                player.velX+=5;
+            }
+            if (keys[37] && player.velX < 3) {
+                player.velX = 0;
+                player.velX-=5;
+            }
+            if (keys[38] && player.velX < 3) {
+                player.velY = 0;
+                player.velY-=5;
+            }
+            if (keys[40] && player.velX < 3) {
+                player.velY = 0;
+                player.velY+=5;
+            }
+            if (player.x+player.width > enemy.x && player.x < enemy.x+enemy.width && player.y+player.height > enemy.y && player.y < enemy.y+enemy.height) {
+                clos();
+            }
+            player.velX *= 0.9;
+            player.velY *= 0.9;
+            ctx.fillStyle = "white";
+            player.x += player.velX;
+            player.y += player.velY;
+            ctx.fillRect(player.x,player.y,player.width,player.height);
+            ctx.fillStyle = "red"
+            ctx.fillRect(enemy.x,enemy.y,enemy.width,enemy.height);
+            requestAnimationFrame(update);
+        }
+        update();
+    </script>
+    <br>
+    <p></p>
+</html>
