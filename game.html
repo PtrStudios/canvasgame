@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
     <canvas id="canvas" width="500" height="500" style="background-color: black;"></canvas>
+    <style type="text/css">
+        canvas {
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
     <script type="text/javascript">
         var canvas = document.getElementById("canvas");
@@ -22,15 +28,61 @@
             width : 50,
             height : 50
         }
-        var enemy = {
-            x : 100,
-            y : 100,
-            width : 50,
-            height: 50
+        function enem(x,y,width,height,right,down) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+			this.right = right;
+			this.down = down;
+            this.col = function() {
+                if (player.x + player.width > enemy.x && player.x < enemy.x + enemy.width && player.y+player.height > enemy.y && player.y < enemy.y + enemy.height || player.x + player.width > enemy2.x && player.x < enemy2.x + enemy2.width && player.y+player.height > enemy2.y && player.y < enemy2.y + enemy2.height) {
+                    return true;    
+                }
+                else return false;
+            }
+			
         }
-        function clos() {
-            window.close();
-        }
+        var enemy = new enem(100,100,50,50,true);
+        var enemy2 = new enem(150,150,50,50,null,true);
+		
+		enemy.move = function() {
+			if (!this.col() && !checkWin()) {
+				if (this.x < canvas.width - this.width && this.right === true) {
+					this.x+=3;
+				}
+				else {
+					this.x-=3; 
+					this.right = false;
+				}
+				if (this.x < 0) {
+					this.right = true;
+				}
+			}
+		}
+		
+		enemy2.move = function() {
+			if (!this.col() && !checkWin()) {
+				if (this.y < canvas.height - this.width && this.down === true) {
+					this.y+=3;
+				}
+				else {
+					this.y-=3;
+					this.down = false;
+				}
+				if (this.y < 0) {
+					this.down = true;
+				}
+			}
+		}
+		function checkWin() {
+			if (player.x > canvas.width - player.width) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
         function update() { 
             ctx.clearRect(0,0,canvas.width,canvas.height);
             if (keys[39] && player.velX < 3) {
@@ -49,20 +101,30 @@
                 player.velY = 0;
                 player.velY+=5;
             }
-            if (player.x+player.width > enemy.x && player.x < enemy.x+enemy.width && player.y+player.height > enemy.y && player.y < enemy.y+enemy.height) {
-                clos();
-            }
             player.velX *= 0.9;
             player.velY *= 0.9;
             ctx.fillStyle = "white";
-            player.x += player.velX;
-            player.y += player.velY;
+            if ((!enemy.col() || !enemy2.col()) && !checkWin()) {
+                player.x += player.velX;
+                player.y += player.velY;
+            }
+            if (enemy.col() || enemy2.col()) {
+				$("p").html("YOU LOSE");
+			}
+			if (checkWin()) {
+				$("p").html("YOU WIN");
+				self.close();
+			}
             ctx.fillRect(player.x,player.y,player.width,player.height);
-            ctx.fillStyle = "red"
+            ctx.fillStyle = "red";
+            enemy.move();
+			enemy2.move();
             ctx.fillRect(enemy.x,enemy.y,enemy.width,enemy.height);
+            ctx.fillRect(enemy2.x,enemy2.y,enemy2.width,enemy2.height);
             requestAnimationFrame(update);
         }
         update();
+	
     </script>
     <br>
     <p></p>
