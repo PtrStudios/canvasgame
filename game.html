@@ -13,6 +13,8 @@
         var ctx = canvas.getContext("2d");
         var requestAnimationFrame = window.requestAnimationFrame ||
                                     window.webkitRequestAnimationFrame;
+        
+        // This detects key presses.
         var keys = [];
         window.addEventListener("keydown",function(e) {
             keys[e.keyCode] = true;
@@ -20,6 +22,12 @@
         window.addEventListener("keyup",function(e) {
             keys[e.keyCode] = false;
         },true);
+        
+        var enemies = [];
+        var totalEnemies = 0;
+        
+        var won = false;
+        // Player object
         var player = {
             x : 50,
             y : 50,
@@ -28,61 +36,59 @@
             width : 50,
             height : 50
         }
-        function enem(x,y,width,height,right,down) {
+		
+		//Enemy function constructor
+        function enem(x,y,width,height,down) {
             this.x = x;
             this.y = y;
             this.width = width;
             this.height = height;
-			this.right = right;
 			this.down = down;
             this.col = function() {
-                if (player.x + player.width > enemy.x && player.x < enemy.x + enemy.width && player.y+player.height > enemy.y && player.y < enemy.y + enemy.height || player.x + player.width > enemy2.x && player.x < enemy2.x + enemy2.width && player.y+player.height > enemy2.y && player.y < enemy2.y + enemy2.height) {
-                    return true;    
+                if (player.x + player.width > this.x && player.x < this.x + this.width && player.y + player.height > this.y && player.y < this.y + this.height) {
+					return true;
                 }
-                else return false;
+                else {return false;}
             }
-			
+            this.draw = function() {
+				ctx.fillStyle = "red";
+				ctx.fillRect(this.x,this.y,this.width,this.height);
+			}
+            this.move = function() {
+				this.y += 5;
+			}
         }
-        var enemy = new enem(100,100,50,50,true);
-        var enemy2 = new enem(150,150,50,50,null,true);
-		
-		enemy.move = function() {
-			if (!this.col() && !checkWin()) {
-				if (this.x < canvas.width - this.width && this.right === true) {
-					this.x+=3;
-				}
-				else {
-					this.x-=3; 
-					this.right = false;
-				}
-				if (this.x < 0) {
-					this.right = true;
-				}
-			}
+        
+        // Function generates random coordinates for enemies.
+		function random(min,max) {
+		    return Math.floor(Math.random() * (max - min) + min);
 		}
 		
-		enemy2.move = function() {
-			if (!this.col() && !checkWin()) {
-				if (this.y < canvas.height - this.width && this.down === true) {
-					this.y+=3;
-				}
-				else {
-					this.y-=3;
-					this.down = false;
-				}
-				if (this.y < 0) {
-					this.down = true;
-				}
+		function spawnEnemies(n) {
+			for (var i = 0; i < n; i++) {
+				enemies[totalEnemies] = new enem(random(100,450),random(-500,-50),50,50,true);
+				totalEnemies++;
 			}
 		}
+        
+		// Checks if the player's x-coordinate is past the canvas.
 		function checkWin() {
 			if (player.x > canvas.width - player.width) {
 				return true;
+				for (var i = 0; i < enemies.length; i++) {
+				    delete enemies[i];
+				}
 			}
 			else {
 				return false;
 			}
 		}
+		
+		setInterval(function() {
+		    spawnEnemies(5);
+        },2000);
+        
+		// This code updates the game.
         function update() { 
             ctx.clearRect(0,0,canvas.width,canvas.height);
             if (keys[39] && player.velX < 3) {
@@ -104,27 +110,28 @@
             player.velX *= 0.9;
             player.velY *= 0.9;
             ctx.fillStyle = "white";
-            if ((!enemy.col() || !enemy2.col()) && !checkWin()) {
+            if (!checkWin()) {
                 player.x += player.velX;
                 player.y += player.velY;
             }
-            if (enemy.col() || enemy2.col()) {
-				$("p").html("YOU LOSE");
-			}
 			if (checkWin()) {
 				$("p").html("YOU WIN");
-				self.close();
+				win = true;
 			}
             ctx.fillRect(player.x,player.y,player.width,player.height);
             ctx.fillStyle = "red";
-            enemy.move();
-			enemy2.move();
-            ctx.fillRect(enemy.x,enemy.y,enemy.width,enemy.height);
-            ctx.fillRect(enemy2.x,enemy2.y,enemy2.width,enemy2.height);
+            for (var i = 0; i < enemies.length; i++) {
+                enemies[i].draw();
+                if (!enemies[i].col()) {
+                    enemies[i].move();
+                }
+                else {
+                    ("p").html("YOU LOSE"); 
+                }
+            }
             requestAnimationFrame(update);
         }
-        update();
-	
+		update();
     </script>
     <br>
     <p></p>
